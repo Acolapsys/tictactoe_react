@@ -7,6 +7,11 @@ class App extends React.Component {
     this.state = {
       squares: Array(9).fill(null),
       count: 0,
+      score: {
+        x: 0,
+        0: 0,
+      },
+      signs: ["x", "0"],
     };
   }
   isWinner = (sign) => {
@@ -18,31 +23,59 @@ class App extends React.Component {
       [1, 4, 7],
       [2, 5, 8],
       [0, 4, 8],
-      [2, 4, 6]
-    ]
-    winnerLines.forEach(el => {
-      if (this.state.squares[el[0]] === sign && this.state.squares[el[1]] === sign && this.state.squares[el[2]] === sign) {
-        alert(sign + " win");
-        setTimeout(() => 
-         this.setState({
-          squares: Array(9).fill(null),
-          count: 0,
-        }), 500)
-      }
-    })
+      [2, 4, 6],
+    ];
+    winnerLines.forEach((el) => {
+      if (
+        this.state.squares[el[0]] === sign &&
+        this.state.squares[el[1]] === sign &&
+        this.state.squares[el[2]] === sign
+      ) {
+        alert(sign + " победили");
+        let currentScore = this.state.score;
+        currentScore[sign]++;
 
-  }
+        this.setState({ score: currentScore });
+        setTimeout(this.clear(), 500);
+      }
+    });
+  };
+
+  isDraw = () => {
+    if (this.state.count === 8) {
+      alert("Ничья");
+      setTimeout(this.clear(), 500);
+    }
+  };
   clickHandler = (event) => {
-    
     let data = event.target.getAttribute("data");
     let currentSquares = this.state.squares;
     if (currentSquares[data] === null) {
-      currentSquares[data] = this.state.count ? "0" : "x";
-      this.setState({ count: !this.state.count });
+      currentSquares[data] =
+        this.state.count % 2 ? this.state.signs[1] : this.state.signs[0];
+      this.setState({ count: this.state.count + 1 });
       this.setState({ squares: currentSquares });
     }
-    console.log(this.state.squares);
+    console.log(
+      this.state.squares,
+      "count= ",
+      this.state.count,
+      "startSign= ",
+      this.state.startSign
+    );
     this.isWinner(currentSquares[data]);
+    this.isDraw();
+  };
+
+  clear = () => {
+    this.setState({
+      count: 0,
+      squares: Array(9).fill(null),
+    });
+  };
+  changeStartSign = (e) => {
+    let currentSigns = e.target.value === "x" ? ["x", "0"] : ["0", "x"];
+    this.setState({ signs: currentSigns });
   };
   render() {
     return (
@@ -76,6 +109,36 @@ class App extends React.Component {
             {this.state.squares[8]}
           </div>
         </div>
+        <p>Счет:</p>
+        {Object.keys(this.state.score).map((el) => (
+          <p>
+            `{el}`: {this.state.score[el]}{" "}
+          </p>
+        ))}
+
+        <p>Выберите кто ходит первым</p>
+        <input
+          type="radio"
+          name="sign"
+          id="x"
+          value="x"
+          onChange={this.changeStartSign}
+        />
+        <label for="x">x</label>
+        <input
+          type="radio"
+          name="sign"
+          id="0"
+          value="0"
+          onChange={this.changeStartSign}
+        />
+        <label for="0">0</label>
+        <br />
+        <br />
+
+        <button className="newGame" onClick={this.clear}>
+          Новая игра
+        </button>
       </div>
     );
   }
